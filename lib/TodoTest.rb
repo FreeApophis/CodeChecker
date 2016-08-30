@@ -11,7 +11,7 @@ class TodoTest < Test
   end
   
   def self.symbol
-    :tabulator
+    :todo
   end
   
   def trim str

@@ -22,7 +22,6 @@ class TabulatorTest < Test
     File.foreach(@filename).with_index do |line, index|
       if (line =~ /\t/)          
         @result.failed "Unallowed character tabulator: #{@filename} on Line #{index_to_line_number(index)}", index
-        break
       end
     end   
     @result.done
