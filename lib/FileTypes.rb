@@ -3,11 +3,12 @@
 class FileTypes
   FileTypes = { 
     '.cpp' => :cpp,
-    '.h' => :header,
-    '.rb' => :ruby,
     '.cs' => :csharp,
-    '.xml' => :xml,
+    '.h' => :header,
+    '.props' => :property_sheet,
+    '.rb' => :ruby,
     '.vcxproj' => :project,
+    '.xml' => :xml,
   }
   
   Directory = :directory
