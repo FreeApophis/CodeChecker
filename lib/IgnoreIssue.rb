@@ -26,6 +26,7 @@ class IgnoreIssue
   end
   
   def count
+    return 0 if @ignore.count == 0
     return @ignore.map {|k, v| v }.first.map{|k,v| v.count}.reduce(:+)
   end
   
