@@ -41,7 +41,11 @@ class VisualStudioHelper
   
   def starter file, index
     system "#{starter_path} #{file} #{index_to_line_number(index)}"
-    exit if gets.chomp == 'q'
+    feedback = gets.chomp 
+    
+    return :quit if feedback == 'q'
+    return :ignore if feedback == 'i'
+    return :next
   end
 
 private

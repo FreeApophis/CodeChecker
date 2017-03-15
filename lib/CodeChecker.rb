@@ -3,12 +3,12 @@
 # ----------------------
 
 require 'find'
-require 'nokogiri'
 
 require_relative 'Settings'
 require_relative 'FileTypes'
 require_relative 'VisualStudioHelper'
 require_relative 'Test'
+require_relative 'IgnoreIssue'
 
 class CodeChecker
    Struct.new("Statistics", :total_files, :violation_files, :violation_lines)
@@ -20,8 +20,10 @@ class CodeChecker
     @settings = settings
     @vs = VisualStudioHelper.new
     @vs.info_banner
+    @ignore = IgnoreIssue.new 'ignore.yml'
 
     check_settings
+    load_skip_list
   end
   
   def check_settings
@@ -32,11 +34,24 @@ class CodeChecker
     end
   end
 
+  def load_skip_list
+    @skip = []
+    @settings.skip.each do |path|
+      if File.exists?(path)
+        Find.find(path) do |sub|
+          @skip << sub      
+        end
+      end
+    end
+  end
 
   def run
+    puts "Ignored Issues: #{@ignore.count}"
+    
     @settings.paths.each do |path|
       puts path
-      Find.find(path) do |sub|
+      Find.find(path) do |sub|        
+        next if @skip.include? sub
         ft = FileTypes::TypeFromFilepath(sub)
         if ft != :directory
           @statistics.total_files += 1
@@ -48,6 +63,14 @@ class CodeChecker
     puts "Files found:          #{@statistics.total_files}"
     puts "Number of violations: #{@statistics.violation_lines}"
     puts "            in Files: #{@statistics.violation_files}"
+    puts "             ignored: #{@ignore.count}"
+
+    clean_up
+  end
+  
+  def clean_up
+    puts "CLEAN UP"
+    @ignore.store
   end
   
   def append_result(result, new_result)
@@ -101,9 +124,18 @@ class CodeChecker
     @statistics.violation_lines += test.result.fails.count
   
     test.result.fails.each do |fail|
+      next if @ignore.ignored? test.class.symbol, test.result.file, fail.line
       puts fail.message
       if @settings.open_in_visual_studio
-        @vs.starter test.result.file, fail.line 
+        interactive = @vs.starter test.result.file, fail.line
+        if (interactive == :quit)
+          clean_up
+          exit
+        end
+        if (interactive == :ignore)
+        fail.line
+          @ignore.add test.class.symbol, test.filename, fail.line
+        end
       end
     end
   end

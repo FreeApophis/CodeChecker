@@ -1,5 +1,5 @@
 class Settings
-  attr_reader :paths, :checks, :configurations
+  attr_reader :paths, :checks, :configurations, :skip
   attr_accessor :try_fix_problems, :open_in_visual_studio, :tfs_checkout
 
   def initialize
@@ -9,5 +9,6 @@ class Settings
     @paths = []
     @checks = []
     @configurations = {}
+    @skip = []
   end
 end
